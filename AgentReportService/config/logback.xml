@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<property name="filePath" value="/opt/viper/AgentReportService/logs" />
+
+
+ <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+       <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>
+				%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%15.15t] %-40c{1.} : %m%n%ex
+			</Pattern>
+		</encoder>
+ </appender>
+	<appender name="FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${filePath}/AgentReportService.log</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>
+				%d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${PID:- } --- [%15.15t] %-40c{1.} : %m%n%ex
+			</Pattern>
+		</encoder>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- rollover daily -->
+			<fileNamePattern>${filePath}/AgentReportService.%d{yyyy-MM-dd-HH}.log
+                        </fileNamePattern>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="com.allconnect" level="info"
+		additivity="false">
+		<appender-ref ref="FILE" />
+	</logger>
+
+	<root level="info">
+	   <appender-ref ref="consoleAppender" />
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>

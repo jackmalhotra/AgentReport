@@ -1,0 +1,111 @@
+package com.allconnect.agentReport.rest.controller;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import com.allconnect.agentReport.model.AgentReportModel;
+import com.allconnect.agentReport.repo.AgentReportRepository;
+import com.allconnect.agentReport.model.AgentReportWTDModel;
+import com.allconnect.agentReport.model.SAASAgentReportMTDModel;
+import com.allconnect.agentReport.model.SAASAgentReportModel;
+import com.allconnect.agentReport.model.SAASAgentReportWTDModel;
+import com.allconnect.agentReport.repo.AgentReportWTDRepository;
+import com.allconnect.agentReport.repo.SAASAgentReportMTDRepository;
+import com.allconnect.agentReport.repo.SAASAgentReportRepository;
+import com.allconnect.agentReport.repo.SAASAgentReportWTDRepository;
+import com.allconnect.agentReport.model.AgentReportTodayModel;
+import com.allconnect.agentReport.repo.AgentReportTodayRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper; 
+import com.fasterxml.jackson.databind.ObjectWriter; 
+
+@RestController
+@RequestMapping("rest")
+public class AgentReportRestController{
+
+	private static final Logger logger = LoggerFactory.getLogger(AgentReportRestController.class);
+	
+	@Autowired
+	private AgentReportRepository agentReportRepository;
+	
+	@Autowired
+	private AgentReportWTDRepository agentReportWTDRepository;
+	
+	@Autowired
+	private AgentReportTodayRepository agentReportTodayRepository;
+	
+	@Autowired
+	private SAASAgentReportRepository saasAgentReportRepository;
+	
+	@Autowired
+	private SAASAgentReportWTDRepository saasAgentReportWTDRepository;
+	
+	@Autowired
+	private SAASAgentReportMTDRepository saasAgentReportMTDRepository;
+	
+
+	@GetMapping("getAgentReportData")
+	public ResponseEntity<Object> getAgentReportData(@RequestParam("agentPhoneId") String agentPhoneId) {
+		logger.info("getAgentReportData api call started");
+		AgentReportModel armMtd = agentReportRepository.getData(agentPhoneId);
+		AgentReportTodayModel armToday = agentReportTodayRepository.getTodayData(agentPhoneId);
+		AgentReportWTDModel armWtd = agentReportWTDRepository.getWtdData(agentPhoneId);
+		JSONObject jsobj = new JSONObject();
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		try {
+			String monthlyAgentReportObject = ow.writeValueAsString(armMtd);
+			String weeklyAgentReportObject = ow.writeValueAsString(armWtd);
+			String dailyAgentReportObject = ow.writeValueAsString(armToday);
+			jsobj.put("monthlyAgentReport", monthlyAgentReportObject);
+			jsobj.put("weeklyAgentReport", weeklyAgentReportObject);
+			jsobj.put("dailyAgentReport", dailyAgentReportObject);
+			logger.info("AgentReportModelResponse="+jsobj);
+			return ResponseEntity.ok().body(jsobj.toString());
+		} 
+		catch (JsonProcessingException e) {
+			logger.error("Error_in_AgentReport="+e.getMessage());
+		}
+		catch (Exception e) {
+			logger.error("Error_in_AgentReport="+e.getMessage());
+		}
+		AgentReportModel armObj = new AgentReportModel();
+		return ResponseEntity.ok().body(armObj.toString());
+
+	}
+	
+	@GetMapping("getSaasAgentReportData")
+	public ResponseEntity<Object> getSaasAgentReportData(@RequestParam("agentLogin") String agentLogin) {
+		logger.info("getAgentReportData api call started");
+		SAASAgentReportModel armToday = saasAgentReportRepository.getSaasReportToday(agentLogin);
+		SAASAgentReportMTDModel armMtd = saasAgentReportMTDRepository.getMTDSaasReport(agentLogin);
+		SAASAgentReportWTDModel armWtd = saasAgentReportWTDRepository.getWTDSaasReport(agentLogin);
+		JSONObject jsobj = new JSONObject();
+		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+		try {
+			String monthlySaasAgentReportObject = ow.writeValueAsString(armMtd);
+			String weeklySaasAgentReportObject = ow.writeValueAsString(armWtd);
+			String dailySaasAgentReportObject = ow.writeValueAsString(armToday);
+			jsobj.put("monthlySaasAgentReport", monthlySaasAgentReportObject);
+			jsobj.put("weeklySaasAgentReport", weeklySaasAgentReportObject);
+			jsobj.put("dailySaasAgentReport", dailySaasAgentReportObject);
+			logger.info("SaasAgentReportModelResponse="+jsobj);
+			return ResponseEntity.ok().body(jsobj.toString());
+		} 
+		catch (JsonProcessingException e) {
+			logger.error("Error_in_SaasAgentReport="+e.getMessage());
+		}
+		catch (Exception e) {
+			logger.error("Error_in_SaasAgentReport="+e.getMessage());
+		}
+		SAASAgentReportModel armObj = new SAASAgentReportModel();
+		return ResponseEntity.ok().body(armObj.toString());
+
+	}
+	
+}
